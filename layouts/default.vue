@@ -6,6 +6,11 @@
           <img src="/cube.png" alt="3D Cube" class="h-8 w-8 mr-2" />
           <h1 class="text-2xl font-bold">3D Print Shop</h1>
         </div>
+        <ul>
+          <li>
+            <a href="/create" class="hover:text-gray-300">Create</a>
+          </li>
+        </ul>
         <ul class="flex space-x-4">
           <li><a href="/" class="hover:text-gray-300">Home</a></li>
           <li>
@@ -26,7 +31,7 @@
 
     <footer class="bg-gray-800 text-white">
       <div class="container mx-auto px-4 py-4 text-center">
-        &copy; 2023 3D Print Shop. All rights reserved.
+        &copy; {{ new Date().getFullYear() }} 3D Print Shop. All rights reserved.
       </div>
     </footer>
   </div>
