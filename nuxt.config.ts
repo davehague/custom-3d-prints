@@ -2,7 +2,11 @@
 export default defineNuxtConfig({
   compatibilityDate: "2024-09-20",
   devtools: { enabled: true },
-  modules: ["@pinia/nuxt", "@nuxtjs/tailwindcss"],
+  modules: [
+    "@pinia/nuxt",
+    "pinia-plugin-persistedstate/nuxt",
+    "@nuxtjs/tailwindcss",
+  ],
   app: {
     head: {
       title: "Custom 3D Print Shop",

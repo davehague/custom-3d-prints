@@ -9,5 +9,9 @@ export interface Product {
   description: string;
   price: number;
   imageUrl: string;
-  customizations: Customization[];
+  customizations: Array<{
+    type: string;
+    options: string[];
+  }>;
+  selectedOptions?: Record<string, string>;
 }

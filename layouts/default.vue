@@ -8,7 +8,14 @@
         </div>
         <ul class="flex space-x-4">
           <li><a href="/" class="hover:text-gray-300">Home</a></li>
-          <li><a href="/cart" class="hover:text-gray-300">Cart</a></li>
+          <li>
+            <a href="/cart" class="hover:text-gray-300 flex items-center">
+              Cart
+              <span v-if="cartStore.itemCount" class="ml-2 bg-green-500 text-white rounded-full px-2 py-1 text-xs">
+                {{ cartStore.itemCount }}
+              </span>
+            </a>
+          </li>
         </ul>
       </nav>
     </header>
@@ -26,5 +33,7 @@
 </template>
 
 <script setup lang="ts">
-// No additional logic needed for this component
+import { useCartStore } from '@/stores/useCartStore';
+
+const cartStore = useCartStore();
 </script>

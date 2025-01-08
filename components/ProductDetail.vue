@@ -24,7 +24,7 @@
           </div>
         </div>
 
-        <button @click="addToCart"
+        <button type="button" @click="addToCart"
           class="bg-green-500 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-green-600 mt-4">
           Add to Cart
         </button>
@@ -37,6 +37,8 @@
 import { ref, computed, watchEffect } from 'vue';
 import { type Product } from '@/types/Product';
 import { getMockProduct } from '@/data/mockProducts'
+import { useCartStore } from '@/stores/useCartStore';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{
   productId: string
@@ -62,13 +64,17 @@ const isFullyCustomized = computed(() => {
   );
 });
 
+const cartStore = useCartStore();
+const router = useRouter();
+
 const addToCart = () => {
-  if (isFullyCustomized.value) {
-    console.log('Adding to cart:', {
-      product: product.value,
-      customizations: selectedOptions.value,
+  if (isFullyCustomized.value && product.value) {
+    cartStore.addToCart({
+      ...product.value,
+      selectedOptions: { ...selectedOptions.value }
     });
-    // Implement your add to cart logic here
+    // Optional: Add a success message or notification here
+    router.push('/cart'); // Redirect to the cart page
   } else {
     alert('Please select all customization options before adding to cart.');
   }
