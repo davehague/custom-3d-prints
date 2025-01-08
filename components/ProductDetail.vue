@@ -34,21 +34,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 import { type Product } from '@/types/Product';
+import { getMockProduct } from '@/data/mockProducts'
 
-// In a real application, you would fetch this data based on the route parameter
-const product = ref<Product>({
-  id: '1',
-  name: '3D Printed Vase',
-  description: 'A beautiful customizable vase that you can personalize to your liking.',
-  price: 29.99,
-  imageUrl: '/placeholder.svg?height=500&width=500',
-  customizations: [
-    { type: 'Color', options: ['Red', 'Blue', 'Green'] },
-    { type: 'Size', options: ['Small', 'Medium', 'Large'] },
-    { type: 'Personalization', options: ['None', 'Add Name', 'Add Date'] },
-  ],
+const props = defineProps<{
+  productId: string
+}>();
+
+const product = ref<Product | null>(null);
+
+// Watch for productId changes and update the product
+watchEffect(() => {
+  const mockProduct = getMockProduct(props.productId);
+  product.value = mockProduct || null;
 });
 
 const selectedOptions = ref<Record<string, string>>({});
@@ -58,7 +57,7 @@ const selectOption = (type: string, option: string) => {
 };
 
 const isFullyCustomized = computed(() => {
-  return product.value.customizations.every(customization =>
+  return product.value?.customizations.every(customization =>
     selectedOptions.value[customization.type] !== undefined
   );
 });

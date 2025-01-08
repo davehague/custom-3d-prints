@@ -1,15 +1,15 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div v-for="product in products" :key="product.id" class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div v-for="product in mockProducts" :key="product.id" class="bg-white rounded-lg shadow-md overflow-hidden">
       <img :src="product.imageUrl" :alt="product.name" class="w-full h-48 object-cover" />
       <div class="p-4">
         <h2 class="text-xl font-semibold mb-2">{{ product.name }}</h2>
         <p class="text-gray-600 mb-4">{{ product.description }}</p>
         <div class="flex justify-between items-center">
           <span class="text-lg font-bold">${{ product.price.toFixed(2) }}</span>
-          <button @click="viewProduct(product.id)" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          <NuxtLink :to="`/product/${product.id}`" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             View Details
-          </button>
+          </NuxtLink>
         </div>
       </div>
     </div>
@@ -17,26 +17,5 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { type Product } from '@/types/Product';
-
-const products = ref<Product[]>([
-  {
-    id: '1',
-    name: '3D Printed Vase',
-    description: 'A beautiful customizable vase',
-    price: 29.99,
-    imageUrl: '/placeholder.svg?height=300&width=300',
-    customizations: [
-      { type: 'Color', options: ['Red', 'Blue', 'Green'] },
-      { type: 'Size', options: ['Small', 'Medium', 'Large'] },
-    ],
-  },
-  // Add more products here
-]);
-
-const viewProduct = (productId: string) => {
-  // Implement navigation to product detail page
-  console.log(`Viewing product ${productId}`);
-};
+import { mockProducts } from '@/data/mockProducts';
 </script>

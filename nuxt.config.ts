@@ -1,13 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2024-09-20',
+  compatibilityDate: "2024-09-20",
   devtools: { enabled: true },
-  modules: [
-    '@pinia/nuxt', '@nuxtjs/tailwindcss'
-  ],
+  modules: ["@pinia/nuxt", "@nuxtjs/tailwindcss"],
   app: {
     head: {
-      title: "Starter Site",
+      title: "Custom 3D Print Shop",
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -37,4 +35,5 @@ export default defineNuxtConfig({
       ],
     },
   },
-})
+  pages: true,
+});
