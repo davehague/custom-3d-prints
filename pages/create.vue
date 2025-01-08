@@ -60,19 +60,22 @@ const handleGenerate = async () => {
   refinedUrl.value = null;
 
   try {
-    const response = await $fetch('/api/generate3DModel', {
-      method: 'POST',
-      body: { prompt: userInput.value },
-      onDownloadProgress: (event) => {
-        // Simulated real-time progress updates for API
-        const newProgress = event.progress * 100;
-        progress.value = Math.max(progress.value, Math.floor(newProgress));
-        statusMessage.value = `Generating model... ${progress.value}%`;
-      },
-    });
+    // const response = await $fetch('/api/generate3DModel', {
+    //   method: 'POST',
+    //   body: { prompt: userInput.value },
+    //   onDownloadProgress: (event) => {
+    //     // Simulated real-time progress updates for API
+    //     const newProgress = event.progress * 100;
+    //     progress.value = Math.max(progress.value, Math.floor(newProgress));
+    //     statusMessage.value = `Generating model... ${progress.value}%`;
+    //   },
+    // });
 
-    previewUrl.value = response.previewModelUrl || null;
-    refinedUrl.value = response.refinedModelUrl || null;
+    // previewUrl.value = response.previewModelUrl || null;
+    // refinedUrl.value = response.refinedModelUrl || null;
+
+    previewUrl.value = "https://prints.davehague.com/";
+    refinedUrl.value = "https://prints.davehague.com/";
 
     statusMessage.value = 'Model generation completed!';
     progress.value = 100;
