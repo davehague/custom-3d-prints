@@ -4,7 +4,7 @@
       <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
         <div class="flex items-center">
           <img src="/cube.png" alt="3D Cube" class="h-8 w-8 mr-2" />
-          <h1 class="text-2xl font-bold">3D Print Shop</h1>
+          <h1 class="text-2xl font-bold">Virtual Craft Innovations</h1>
         </div>
         <ul>
           <li>

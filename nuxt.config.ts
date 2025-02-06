@@ -9,7 +9,7 @@ export default defineNuxtConfig({
   ],
   app: {
     head: {
-      title: "Custom 3D Print Shop",
+      title: "Virtual Craft Innovations",
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
