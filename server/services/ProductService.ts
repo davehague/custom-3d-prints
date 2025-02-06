@@ -135,4 +135,24 @@ export class ProductService {
       throw error
     }
   }
+
+  static async deleteProduct(id: string): Promise<void> {
+    console.log(`[ProductService] Deleting product:`, id)
+    try {
+      const { error } = await serverSupabase
+        .from('products')
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        console.error(`[ProductService] Error deleting product:`, error)
+        throw error
+      }
+
+      console.log(`[ProductService] Successfully deleted product:`, id)
+    } catch (error) {
+      console.error(`[ProductService] Unexpected error in deleteProduct:`, error)
+      throw error
+    }
+  }
 }
