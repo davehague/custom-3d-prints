@@ -7,9 +7,3 @@ export interface GoogleUser {
   family_name: string
   locale: string
 }
-
-export interface DBUser {
-  email: string
-  name: string
-  picture: string
-}

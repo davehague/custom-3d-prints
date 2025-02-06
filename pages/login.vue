@@ -20,10 +20,10 @@
                     <div class="mb-8">
                         <i class="i-heroicons-book-open text-5xl text-blue-600"></i>
                         <h1 class="text-2xl font-bold text-gray-900 mt-4">
-                            VCI Admin Portal
+                            Welcome to Readwise Tools
                         </h1>
                         <p class="text-gray-600 mt-2">
-                            Sign in with Google to administer the site
+                            Sign in with your Google account to access all features
                         </p>
                     </div>
                     <div class="flex flex-col gap-4 items-center">
@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { type DBUser } from '@/types/interfaces'
+import { type DBUser } from '@/types/database'
 
 definePageMeta({
     layout: 'landing'
