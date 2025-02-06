@@ -42,6 +42,16 @@ export default defineEventHandler(async (event: H3Event) => {
         });
       }
 
+      const existingUser = await UserService.findByEmail(body.email);
+      if (existingUser) {
+        console.log(`[API] POST /users - User exists, updating:`, existingUser.id);
+        return await UserService.update(existingUser.id, {
+          name: body.name,
+          picture: body.picture,
+          last_login: new Date(),
+        });
+      }
+
       return await UserService.createFromGoogle(body);
     }
 

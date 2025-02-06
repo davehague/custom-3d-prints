@@ -20,10 +20,10 @@
                     <div class="mb-8">
                         <i class="i-heroicons-book-open text-5xl text-blue-600"></i>
                         <h1 class="text-2xl font-bold text-gray-900 mt-4">
-                            Welcome to Readwise Tools
+                            VCI Admin Panel
                         </h1>
                         <p class="text-gray-600 mt-2">
-                            Sign in with your Google account to access all features
+                            Sign in with Google to administer the site.
                         </p>
                     </div>
                     <div class="flex flex-col gap-4 items-center">
