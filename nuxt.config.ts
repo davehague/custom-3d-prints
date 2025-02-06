@@ -2,10 +2,27 @@
 export default defineNuxtConfig({
   compatibilityDate: "2024-09-20",
   devtools: { enabled: true },
+  devServer: {
+    https: {
+      key: './localhost-key.pem',
+      cert: './localhost.pem',
+    },
+    port: 3000,
+  },
+  runtimeConfig: {
+    oauth: {
+      google: {
+        clientId: process.env.NUXT_OAUTH_GOOGLE_CLIENT_ID,
+        clientSecret: process.env.NUXT_OAUTH_GOOGLE_CLIENT_SECRET,
+        redirectURL: process.env.NUXT_OAUTH_GOOGLE_REDIRECT_URL,
+      },
+    },
+  },
   modules: [
     "@pinia/nuxt",
     "pinia-plugin-persistedstate/nuxt",
     "@nuxtjs/tailwindcss",
+    "nuxt-auth-utils",
   ],
   app: {
     head: {
