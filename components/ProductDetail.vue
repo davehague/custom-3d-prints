@@ -72,6 +72,12 @@ onMounted(async () => {
 });
 
 const contactForQuote = () => {
-  router.push('/contact');
+  router.push({
+    path: '/contact',
+    query: {
+      product: product.value?.name,
+      id: props.productId
+    }
+  });
 };
 </script>
