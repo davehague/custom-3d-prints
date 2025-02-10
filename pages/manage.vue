@@ -13,45 +13,53 @@
         </div>
 
         <!-- Product Creation Form -->
-        <div class="bg-white shadow rounded-lg p-4 mb-6">
-            <h2 class="text-xl font-semibold mb-4">{{ editingProduct ? 'Edit Product' : 'Create New Product' }}</h2>
+        <div class="bg-blue-50 shadow-lg rounded-lg p-6 mb-6 border border-blue-100">
+            <h2 class="text-2xl font-bold mb-4 text-blue-800 border-b border-blue-200 pb-2">
+                {{ editingProduct ? 'Edit Product' : 'Create New Product' }}
+            </h2>
             <form @submit.prevent="handleSubmit" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Name</label>
-                    <input v-model="form.name" type="text" required class="w-full p-2 border rounded" />
+                    <label class="block text-sm font-semibold text-blue-900 mb-2">Name</label>
+                    <input v-model="form.name" type="text" required
+                        class="w-full p-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Description</label>
-                    <textarea v-model="form.description" class="w-full p-2 border rounded" rows="3"></textarea>
+                    <label class="block text-sm font-semibold text-blue-900 mb-2">Description</label>
+                    <textarea v-model="form.description"
+                        class="w-full p-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
+                        rows="3"></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Price</label>
-                    <input v-model="form.price" type="text" required class="w-full p-2 border rounded"
+                    <label class="block text-sm font-semibold text-blue-900 mb-2">Price</label>
+                    <input v-model="form.price" type="text" required
+                        class="w-full p-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
                         placeholder="e.g. $25.00 or 'Custom quote'" />
                 </div>
-                <div class="flex items-center">
-                    <label class="flex items-center">
-                        <input v-model="form.active" type="checkbox" class="mr-2" />
+                <div class="flex items-center py-2">
+                    <label class="flex items-center text-blue-900 font-semibold">
+                        <input v-model="form.active" type="checkbox" class="mr-2 h-5 w-5 text-blue-600" />
                         Active
                     </label>
                 </div>
-                <div class="flex justify-end space-x-2">
+                <div class="flex justify-end space-x-3 pt-4 border-t border-blue-200">
                     <button v-if="editingProduct" type="button" @click="cancelEdit"
-                        class="px-4 py-2 bg-gray-200 rounded">
+                        class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold transition-colors">
                         Cancel
                     </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">
-                        {{ editingProduct ? 'Update' : 'Create' }}
+                    <button type="submit"
+                        class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
+                        {{ editingProduct ? 'Update' : 'Create New' }}
                     </button>
                 </div>
             </form>
         </div>
 
-        <div v-if="editingProduct" class="bg-white shadow rounded-lg p-4 mb-6">
+        <div v-if="editingProduct" class="bg-white shadow rounded-lg mb-6">
             <ProductImageManager :product-id="editingProduct" />
         </div>
 
         <!-- Products List -->
+        <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b border-gray-200 pb-2">Product List</h2>
         <div class="bg-white shadow rounded-lg">
             <table class="min-w-full">
                 <thead>

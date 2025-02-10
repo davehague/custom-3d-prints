@@ -1,34 +1,36 @@
-// components/ProductImageManager.vue
 <template>
-    <div class="space-y-4">
-        <div class="flex items-center justify-between">
-            <h3 class="text-lg font-medium">Product Images</h3>
-            <label class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+    <div class="bg-blue-50 border border-blue-100 p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-blue-200 pb-4">
+            <h3 class="text-2xl font-bold text-blue-800">Product Images</h3>
+            <label
+                class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors">
                 Upload Images
                 <input type="file" multiple accept="image/*" class="hidden" @change="handleFileUpload" />
             </label>
         </div>
 
         <!-- Loading state -->
-        <div v-if="loading" class="text-center py-4">
+        <div v-if="loading" class="text-center py-4 text-blue-800">
             Loading...
         </div>
 
         <!-- Image grid -->
         <div v-if="images.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div v-for="image in images" :key="image.id" class="relative group">
-                <img :src="image.public_url" class="w-full h-40 object-cover rounded transition-all duration-200"
+                <img :src="image.public_url"
+                    class="w-full h-40 object-cover rounded-lg transition-all duration-200 border border-blue-200"
                     :class="{ 'ring-2 ring-blue-500 ring-offset-2': image.is_primary }" />
 
                 <!-- Primary badge -->
                 <div v-if="image.is_primary"
-                    class="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                    class="absolute top-2 left-2 bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-semibold">
                     Primary
                 </div>
 
                 <div
-                    class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
-                    <button @click="setPrimaryImage(image.id)" class="p-2 rounded text-white transition-colors"
+                    class="absolute inset-0 bg-blue-900 bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-3 rounded-lg">
+                    <button @click="setPrimaryImage(image.id)"
+                        class="px-4 py-2 rounded-lg text-white transition-colors font-semibold"
                         :class="image.is_primary ? 'bg-blue-700 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'"
                         :disabled="image.is_primary"
                         :title="image.is_primary ? 'This is the primary image' : 'Set as primary image'">
@@ -40,14 +42,14 @@
                         </template>
                     </button>
                     <button @click="deleteImage(image.id)"
-                        class="p-2 bg-red-500 hover:bg-red-600 rounded text-white transition-colors">
+                        class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-white transition-colors font-semibold">
                         Delete
                     </button>
                 </div>
             </div>
         </div>
 
-        <div v-else class="text-center py-8 bg-gray-50 rounded">
+        <div v-else class="text-center py-8 bg-blue-100/50 rounded-lg border border-blue-200 text-blue-800">
             No images uploaded yet
         </div>
     </div>
