@@ -177,14 +177,6 @@ export class ProductService {
     }
   }
 
-  private static generatePublicUrl(filePath: string): string {
-    const { data } = serverSupabase.storage
-      .from("product-images")
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
-  }
-
   static async uploadProductImage(
     productId: string,
     file: File
@@ -220,9 +212,6 @@ export class ProductService {
         throw uploadError;
       }
 
-      // Get the public URL for the uploaded file
-      const publicUrl = this.generatePublicUrl(filePath);
-
       // Get the count of existing images to determine if this should be primary
       const { data: existingImages, error: countError } = await serverSupabase
         .from("product_images")
@@ -244,9 +233,9 @@ export class ProductService {
         .insert({
           product_id: productId,
           storage_path: filePath,
-          public_url: publicUrl,
           display_order: existingImages.length,
           is_primary: isPrimary,
+          public_url: this.generatePublicUrl(filePath),
         })
         .select()
         .single();
@@ -404,5 +393,13 @@ export class ProductService {
       );
       throw error;
     }
+  }
+
+  private static generatePublicUrl(filePath: string): string {
+    const { data } = serverSupabase.storage
+      .from("product-images")
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
   }
 }

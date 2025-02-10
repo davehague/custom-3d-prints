@@ -46,6 +46,10 @@
             </form>
         </div>
 
+        <div v-if="editingProduct" class="bg-white shadow rounded-lg p-4 mb-6">
+            <ProductImageManager :product-id="editingProduct" />
+        </div>
+
         <!-- Products List -->
         <div class="bg-white shadow rounded-lg">
             <table class="min-w-full">
@@ -90,6 +94,8 @@
 import { ref, onMounted } from 'vue'
 import { useProductStore } from '~/stores/products'
 import type { DBProduct } from '@/types/database'
+import ProductImageManager from '@/components/ProductImageManager.vue'
+
 
 const productStore = useProductStore()
 const editingProduct = ref<string | null>(null)

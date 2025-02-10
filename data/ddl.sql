@@ -76,3 +76,6 @@ alter table virtualcraftinnovations.product_images enable row level security;
 alter table virtualcraftinnovations.customization_types enable row level security;
 alter table virtualcraftinnovations.customization_options enable row level security;
 alter table virtualcraftinnovations.product_customizations enable row level security;
+
+
+ALTER TABLE virtualcraftinnovations.product_images ADD COLUMN public_url TEXT;

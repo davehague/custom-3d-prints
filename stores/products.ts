@@ -1,7 +1,14 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import type { DBProduct, DBProductWithDetails, Database } from "@/types/database";
+import type { DBProduct, DBProductImage, DBProductWithDetails, Database } from "@/types/database";
 
+interface ImageUpdatePayload {
+    imageId: string
+    isPrimary?: boolean
+    displayOrder?: number
+  }
+
+  
 export const useProductStore = defineStore(
   "products",
   () => {
@@ -9,6 +16,8 @@ export const useProductStore = defineStore(
     const currentProduct = ref<DBProductWithDetails | null>(null);
     const loading = ref(false);
     const error = ref<string | null>(null);
+    const productImages = ref<Record<string, DBProductImage[]>>({});
+
 
     function clear() {
       products.value = [];
@@ -115,6 +124,102 @@ export const useProductStore = defineStore(
       }
     }
 
+    async function getProductImages(productId: string): Promise<DBProductImage[]> {
+        try {
+          loading.value = true;
+          const response = await $fetch<{ success: boolean; data: DBProductImage[] }>(
+            `/api/database/products/${productId}/images`,
+            { method: "GET" }
+          );
+          productImages.value[productId] = response.data;
+          return response.data;
+        } catch (err: any) {
+          error.value = err.message;
+          throw err;
+        } finally {
+          loading.value = false;
+        }
+      }
+      
+      async function uploadProductImages(productId: string, files: File[]): Promise<DBProductImage[]> {
+        try {
+          loading.value = true;
+          const formData = new FormData();
+          files.forEach(file => formData.append('files', file));
+      
+          const response = await $fetch<{ success: boolean; data: DBProductImage[] }>(
+            `/api/database/products/${productId}/images`,
+            {
+              method: "POST",
+              body: formData
+            }
+          );
+      
+          // Update local state
+          if (!productImages.value[productId]) {
+            productImages.value[productId] = [];
+          }
+          productImages.value[productId].push(...response.data);
+          
+          return response.data;
+        } catch (err: any) {
+          error.value = err.message;
+          throw err;
+        } finally {
+          loading.value = false;
+        }
+      }
+      
+      async function updateProductImage(productId: string, updates: ImageUpdatePayload): Promise<DBProductImage> {
+        try {
+          loading.value = true;
+          const response = await $fetch<{ success: boolean; data: DBProductImage }>(
+            `/api/database/products/${productId}/images`,
+            {
+              method: "PATCH",
+              body: updates
+            }
+          );
+      
+          // Update local state
+          if (productImages.value[productId]) {
+            const index = productImages.value[productId].findIndex(img => img.id === updates.imageId);
+            if (index !== -1) {
+              productImages.value[productId][index] = response.data;
+            }
+          }
+      
+          return response.data;
+        } catch (err: any) {
+          error.value = err.message;
+          throw err;
+        } finally {
+          loading.value = false;
+        }
+      }
+      
+      async function deleteProductImage(productId: string, imageId: string): Promise<void> {
+        try {
+          loading.value = true;
+          await $fetch(`/api/database/products/${productId}/images`, {
+            method: "DELETE",
+            params: { imageId }
+          });
+      
+          // Update local state
+          if (productImages.value[productId]) {
+            productImages.value[productId] = productImages.value[productId].filter(
+              img => img.id !== imageId
+            );
+          }
+        } catch (err: any) {
+          error.value = err.message;
+          throw err;
+        } finally {
+          loading.value = false;
+        }
+      }
+
     return {
       products,
       currentProduct,
@@ -125,7 +230,13 @@ export const useProductStore = defineStore(
       getProductById,
       createProduct,
       updateProduct,
-      deleteProduct
+      deleteProduct,
+      
+      productImages,
+      getProductImages,
+      uploadProductImages,
+      updateProductImage,
+      deleteProductImage,
     };
   },
   { persist: true }
