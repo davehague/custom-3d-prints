@@ -7,6 +7,12 @@ export class ProductService {
   static async getAllProducts(): Promise<DBProduct[]> {
     console.log(`[ProductService] Getting all active products`)
     try {
+      // Verify connection
+      if (!serverSupabase) {
+        console.error(`[ProductService] Supabase client not initialized`);
+        throw new Error('Database connection not initialized');
+      }
+
       const { data, error } = await serverSupabase
         .from('products')
         .select('*')
@@ -18,8 +24,8 @@ export class ProductService {
         throw error
       }
 
-      console.log(`[ProductService] Found ${data.length} products`)
-      return data
+      console.log(`[ProductService] Found ${data?.length ?? 0} products`)
+      return data || []
     } catch (error) {
       console.error(`[ProductService] Unexpected error in getAllProducts:`, error)
       throw error

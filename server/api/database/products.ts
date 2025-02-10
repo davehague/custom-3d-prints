@@ -11,13 +11,24 @@ export default defineEventHandler(async (event: H3Event) => {
     // GET - Find all products or single product by ID
     if (event.method === "GET") {
       const { id } = getQuery<ProductQueryParams>(event);
-      console.log(`[API] GET /products - ${id ? `Fetching product ${id}` : 'Fetching all products'}`);
+      console.log(`[API] GET /products - Starting request`);
 
-      if (id) {
-        return await ProductService.getProductById(id);
+      try {
+        let result;
+        if (id) {
+          result = await ProductService.getProductById(id);
+        } else {
+          result = await ProductService.getAllProducts();
+        }
+        console.log(`[API] GET /products - Success:`, result ? 'Data retrieved' : 'No data');
+        return { success: true, data: result };
+      } catch (err) {
+        console.error(`[API] GET /products - ProductService error:`, err);
+        throw createError({
+          statusCode: 500,
+          message: err instanceof Error ? err.message : 'Internal server error'
+        });
       }
-      
-      return await ProductService.getAllProducts();
     }
 
     // POST - Create new product
@@ -71,10 +82,15 @@ export default defineEventHandler(async (event: H3Event) => {
       message: "Method not allowed",
     });
   } catch (error: any) {
-    console.error(`[API] Error in /products:`, error);
+    console.error(`[API] Error in /products:`, {
+      message: error.message,
+      stack: error.stack,
+      cause: error.cause
+    });
     throw createError({
       statusCode: error.statusCode || 500,
-      message: error.message,
+      message: error.message || 'Internal server error',
+      stack: error.stack
     });
   }
 });

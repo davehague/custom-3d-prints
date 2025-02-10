@@ -58,7 +58,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="product in productStore.products" :key="product.id" class="border-t">
+                    <tr v-if="productStore.products.length === 0">
+                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                            No products available. Create one using the form above.
+                        </td>
+                    </tr>
+                    <tr v-else v-for="product in productStore.products" :key="product.id" class="border-t">
                         <td class="px-4 py-2">{{ product.name }}</td>
                         <td class="px-4 py-2">${{ product.price.toFixed(2) }}</td>
                         <td class="px-4 py-2 text-center">

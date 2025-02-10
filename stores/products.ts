@@ -20,11 +20,12 @@ export const useProductStore = defineStore(
     async function getAllProducts(): Promise<DBProduct[]> {
       try {
         loading.value = true;
-        const data = await $fetch<DBProduct[]>("/api/database/products", {
+        error.value = null; // Reset error state
+        const response = await $fetch<{ success: boolean; data: DBProduct[] }>("/api/database/products", {
           method: "GET"
         });
-        products.value = data;
-        return data;
+        products.value = response.data || [];
+        return products.value;
       } catch (err: any) {
         error.value = err.message;
         throw err;
@@ -36,12 +37,12 @@ export const useProductStore = defineStore(
     async function getProductById(id: string): Promise<DBProductWithDetails | null> {
       try {
         loading.value = true;
-        const product = await $fetch<DBProductWithDetails>("/api/database/products", {
+        const response = await $fetch<{ success: boolean; data: DBProductWithDetails }>("/api/database/products", {
           method: "GET",
           params: { id }
         });
-        currentProduct.value = product;
-        return product;
+        currentProduct.value = response.data;
+        return response.data;
       } catch (err: any) {
         error.value = err.message;
         return null;
