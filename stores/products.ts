@@ -4,6 +4,7 @@ import type {
   DBProduct,
   DBProductImage,
   DBProductWithDetails,
+  DBProductWithImages,
   Database,
 } from "@/types/database";
 
@@ -16,7 +17,8 @@ interface ImageUpdatePayload {
 export const useProductStore = defineStore(
   "products",
   () => {
-    const products = ref<DBProduct[]>([]);
+    // Change the type to include images
+    const products = ref<DBProductWithImages[]>([]);
     const currentProduct = ref<DBProductWithDetails | null>(null);
     const loading = ref(false);
     const error = ref<string | null>(null);
@@ -29,16 +31,16 @@ export const useProductStore = defineStore(
       error.value = null;
     }
 
-    async function getAllProducts(): Promise<DBProduct[]> {
+    async function getAllProducts(): Promise<DBProductWithImages[]> {
       try {
         loading.value = true;
         error.value = null; // Reset error state
-        const response = await $fetch<{ success: boolean; data: DBProduct[] }>(
-          "/api/database/products",
-          {
-            method: "GET",
-          }
-        );
+        const response = await $fetch<{
+          success: boolean;
+          data: DBProductWithImages[];
+        }>("/api/database/products", {
+          method: "GET",
+        });
         products.value = response.data || [];
         return products.value;
       } catch (err: any) {
@@ -73,15 +75,20 @@ export const useProductStore = defineStore(
 
     async function createProduct(
       productData: Database["public"]["Tables"]["products"]["Insert"]
-    ): Promise<DBProduct> {
+    ): Promise<DBProductWithImages> {
       try {
         loading.value = true;
         const product = await $fetch<DBProduct>("/api/database/products", {
           method: "POST",
           body: productData,
         });
-        products.value.push(product);
-        return product;
+        // Convert to DBProductWithImages with empty images array for local state
+        const productWithImages: DBProductWithImages = {
+          ...product,
+          images: [],
+        };
+        products.value.push(productWithImages);
+        return productWithImages;
       } catch (err: any) {
         error.value = err.message;
         throw err;
@@ -93,7 +100,7 @@ export const useProductStore = defineStore(
     async function updateProduct(
       id: string,
       updates: Partial<DBProduct>
-    ): Promise<DBProduct> {
+    ): Promise<DBProductWithImages> {
       try {
         loading.value = true;
         const product = await $fetch<DBProduct>("/api/database/products", {
@@ -101,16 +108,23 @@ export const useProductStore = defineStore(
           body: { id, ...updates },
         });
 
+        // Find existing product to preserve images
+        const existingProduct = products.value.find((p) => p.id === id);
+        const productWithImages: DBProductWithImages = {
+          ...product,
+          images: existingProduct?.images || [],
+        };
+
         // Update local state
         const index = products.value.findIndex((p) => p.id === id);
         if (index !== -1) {
-          products.value[index] = product;
+          products.value[index] = productWithImages;
         }
         if (currentProduct.value?.id === id) {
           currentProduct.value = { ...currentProduct.value, ...product };
         }
 
-        return product;
+        return productWithImages;
       } catch (err: any) {
         error.value = err.message;
         throw err;

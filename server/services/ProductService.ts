@@ -1,10 +1,14 @@
 // server/services/ProductService.ts
-import { DBProductImage, type Database } from "@/types/database";
+import {
+  DBProductImage,
+  DBProductWithImages,
+  type Database,
+} from "@/types/database";
 import { type DBProduct, type DBProductWithDetails } from "@/types/database";
 import { serverSupabase } from "../utils/serverSupabaseClient";
 
 export class ProductService {
-  static async getAllProducts(): Promise<DBProduct[]> {
+  static async getAllProducts(): Promise<DBProductWithImages[]> {
     console.log(`[ProductService] Getting all active products`);
     try {
       // Verify connection
@@ -15,7 +19,12 @@ export class ProductService {
 
       const { data, error } = await serverSupabase
         .from("products")
-        .select("*")
+        .select(
+          `
+          *,
+          images:product_images(*)
+        `
+        )
         .eq("active", true)
         .order("name");
 

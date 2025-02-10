@@ -26,7 +26,8 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Price</label>
-                    <input v-model="form.price" type="number" required step="0.01" class="w-full p-2 border rounded" />
+                    <input v-model="form.price" type="text" required class="w-full p-2 border rounded"
+                        placeholder="e.g. $25.00 or 'Custom quote'" />
                 </div>
                 <div class="flex items-center">
                     <label class="flex items-center">
@@ -57,19 +58,25 @@
                     <tr>
                         <th class="px-4 py-2 text-left">Name</th>
                         <th class="px-4 py-2 text-left">Price</th>
+                        <th class="px-4 py-2 text-center">Images</th>
                         <th class="px-4 py-2 text-center">Status</th>
                         <th class="px-4 py-2 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-if="productStore.products.length === 0">
-                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
                             No products available. Create one using the form above.
                         </td>
                     </tr>
                     <tr v-else v-for="product in productStore.products" :key="product.id" class="border-t">
                         <td class="px-4 py-2">{{ product.name }}</td>
-                        <td class="px-4 py-2">${{ product.price.toFixed(2) }}</td>
+                        <td class="px-4 py-2">{{ product.price }}</td>
+                        <td class="px-4 py-2 text-center">
+                            <span class="text-gray-600">
+                                {{ product.images?.length || 0 }}
+                            </span>
+                        </td>
                         <td class="px-4 py-2 text-center">
                             <span :class="product.active ? 'text-green-600' : 'text-red-600'">
                                 {{ product.active ? 'Active' : 'Inactive' }}
@@ -93,7 +100,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useProductStore } from '~/stores/products'
-import type { DBProduct } from '@/types/database'
+import type { DBProduct, DBProductWithImages } from '@/types/database'
 import ProductImageManager from '@/components/ProductImageManager.vue'
 
 
@@ -103,7 +110,7 @@ const editingProduct = ref<string | null>(null)
 const form = ref({
     name: '',
     description: '',
-    price: 0,
+    price: '',
     active: true
 })
 
@@ -115,13 +122,13 @@ function resetForm() {
     form.value = {
         name: '',
         description: '',
-        price: 0,
+        price: '',
         active: true
     }
     editingProduct.value = null
 }
 
-function editProduct(product: DBProduct) {
+function editProduct(product: DBProductWithImages) {
     editingProduct.value = product.id
     form.value = {
         name: product.name,

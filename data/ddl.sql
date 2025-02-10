@@ -79,3 +79,4 @@ alter table virtualcraftinnovations.product_customizations enable row level secu
 
 
 ALTER TABLE virtualcraftinnovations.product_images ADD COLUMN public_url TEXT;
+ALTER TABLE readwise.products ALTER COLUMN price TYPE VARCHAR(255);

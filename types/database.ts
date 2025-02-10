@@ -12,7 +12,7 @@ export interface DBProduct {
   id: string;
   name: string;
   description: string | null;
-  price: number;
+  price: string;
   active: boolean;
   created_at: Date;
   updated_at: Date;
