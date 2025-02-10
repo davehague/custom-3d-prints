@@ -1,82 +1,77 @@
 <template>
-  <div v-if="product" class="container mx-auto px-4 py-8">
-    <div class="flex flex-col md:flex-row">
+  <div v-if="productStore.loading" class="text-center py-8">
+    Loading...
+  </div>
+  <div v-else-if="productStore.error" class="text-center py-8 text-red-600">
+    {{ productStore.error }}
+  </div>
+  <div v-else-if="product" class="container mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row gap-8">
+      <!-- Image Gallery Section -->
       <div class="md:w-1/2">
-        <img :src="product.imageUrl" :alt="product.name" class="w-full rounded-lg shadow-md" />
+        <img :src="currentImage || product.images?.[0]?.public_url || '/cube.png'" :alt="product.name"
+          class="w-full rounded-lg shadow-md object-cover aspect-square" />
+        <div v-if="product.images?.length > 1" class="mt-4 flex gap-2 overflow-x-auto">
+          <img v-for="image in product.images" :key="image.id" :src="image.public_url" :alt="product.name"
+            @click="currentImage = image.public_url"
+            class="w-24 h-24 object-cover cursor-pointer rounded border-2 hover:border-blue-500"
+            :class="currentImage === image.public_url ? 'border-blue-500' : 'border-transparent'" />
+        </div>
       </div>
-      <div class="md:w-1/2 md:pl-8 mt-4 md:mt-0">
-        <h1 class="text-3xl font-bold mb-4">{{ product.name }}</h1>
-        <p class="text-gray-600 mb-4">{{ product.description }}</p>
-        <div class="text-2xl font-bold mb-4">${{ product.price.toFixed(2) }}</div>
 
-        <div v-for="customization in product.customizations" :key="customization.type" class="mb-4">
-          <h3 class="text-lg font-semibold mb-2">{{ customization.type }}</h3>
-          <div class="flex flex-wrap gap-2">
-            <button v-for="option in customization.options" :key="option"
-              @click="selectOption(customization.type, option)" :class="[
-                'px-4 py-2 rounded',
-                selectedOptions[customization.type] === option
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-              ]">
-              {{ option }}
-            </button>
-          </div>
+      <!-- Product Details Section -->
+      <div class="md:w-1/2">
+        <h1 class="text-3xl font-bold mb-4">{{ product.name }}</h1>
+        <div class="text-2xl font-semibold mb-4 text-blue-600">
+          {{ product.price }}
+        </div>
+        <div class="prose max-w-none mb-8">
+          <p class="text-gray-600">{{ product.description }}</p>
         </div>
 
-        <button type="button" @click="addToCart"
-          class="bg-green-500 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-green-600 mt-4">
-          Add to Cart
-        </button>
+        <div v-if="product.active" class="space-y-4">
+          <button @click="contactForQuote"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition-colors">
+            Request Quote
+          </button>
+          <p class="text-sm text-gray-600">
+            Contact us for custom specifications and pricing details.
+          </p>
+        </div>
+        <div v-else class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p class="text-red-600">This product is currently unavailable.</p>
+        </div>
       </div>
     </div>
+  </div>
+  <div v-else class="text-center py-8">
+    Product not found
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watchEffect } from 'vue';
-import { type Product } from '@/types/Product';
-import { getMockProduct } from '@/data/mockProducts'
-import { useCartStore } from '@/stores/useCartStore';
+import { ref, onMounted, computed } from 'vue';
+import { useProductStore } from '~/stores/products';
 import { useRouter } from 'vue-router';
 
 const props = defineProps<{
   productId: string
 }>();
 
-const product = ref<Product | null>(null);
-
-// Watch for productId changes and update the product
-watchEffect(() => {
-  const mockProduct = getMockProduct(props.productId);
-  product.value = mockProduct || null;
-});
-
-const selectedOptions = ref<Record<string, string>>({});
-
-const selectOption = (type: string, option: string) => {
-  selectedOptions.value[type] = option;
-};
-
-const isFullyCustomized = computed(() => {
-  return product.value?.customizations.every(customization =>
-    selectedOptions.value[customization.type] !== undefined
-  );
-});
-
-const cartStore = useCartStore();
+const productStore = useProductStore();
 const router = useRouter();
+const currentImage = ref<string | null>(null);
 
-const addToCart = () => {
-  if (isFullyCustomized.value && product.value) {
-    cartStore.addToCart({
-      ...product.value,
-      selectedOptions: { ...selectedOptions.value }
-    });
-    // Optional: Add a success message or notification here
-    router.push('/cart'); // Redirect to the cart page
-  } else {
-    alert('Please select all customization options before adding to cart.');
+const product = computed(() => productStore.currentProduct);
+
+onMounted(async () => {
+  await productStore.getProductById(props.productId);
+  if (productStore.currentProduct?.images?.[0]) {
+    currentImage.value = productStore.currentProduct.images[0].public_url;
   }
+});
+
+const contactForQuote = () => {
+  router.push('/contact');
 };
 </script>

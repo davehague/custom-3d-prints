@@ -54,11 +54,7 @@ export class ProductService {
         .select(
           `
           *,
-          images:product_images(*),
-          customizations:product_customizations(
-            type:customization_types(*),
-            options:customization_options(*)
-          )
+          images:product_images(*)
         `
         )
         .eq("id", id)
