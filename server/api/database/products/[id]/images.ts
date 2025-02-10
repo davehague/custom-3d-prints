@@ -5,11 +5,11 @@ import type { DBProductImage } from "@/types/database";
 
 export default defineEventHandler(async (event: H3Event) => {
   const productId = event.context.params?.id;
-  
+
   if (!productId) {
     throw createError({
       statusCode: 400,
-      message: "Product ID is required"
+      message: "Product ID is required",
     });
   }
 
@@ -26,7 +26,7 @@ export default defineEventHandler(async (event: H3Event) => {
       if (!formData) {
         throw createError({
           statusCode: 400,
-          message: "No files provided"
+          message: "No files provided",
         });
       }
 
@@ -34,8 +34,13 @@ export default defineEventHandler(async (event: H3Event) => {
       for (const file of formData) {
         if (file.filename && file.data) {
           const blob = new Blob([file.data], { type: file.type });
-          const uploadedFile = new File([blob], file.filename, { type: file.type });
-          const result = await ProductService.uploadProductImage(productId, uploadedFile);
+          const uploadedFile = new File([blob], file.filename, {
+            type: file.type,
+          });
+          const result = await ProductService.uploadProductImage(
+            productId,
+            uploadedFile
+          );
           results.push(result);
         }
       }
@@ -45,27 +50,37 @@ export default defineEventHandler(async (event: H3Event) => {
 
     // PATCH - Update image metadata
     if (event.method === "PATCH") {
-      const body = await readBody<{ imageId: string } & Partial<DBProductImage>>(event);
-      
+      const body = await readBody<{ imageId: string; isPrimary?: boolean }>(
+        event
+      );
+
       if (!body.imageId) {
         throw createError({
           statusCode: 400,
-          message: "Image ID is required"
+          message: "Image ID is required",
         });
       }
 
-      const result = await ProductService.updateProductImage(body.imageId, body);
+      const updates: Partial<DBProductImage> = {};
+      if (body.isPrimary !== undefined) {
+        updates.is_primary = body.isPrimary;
+      }
+
+      const result = await ProductService.updateProductImage(
+        body.imageId,
+        updates
+      );
       return { success: true, data: result };
     }
 
     // DELETE - Delete an image
     if (event.method === "DELETE") {
       const { imageId } = getQuery(event);
-      
+
       if (!imageId) {
         throw createError({
           statusCode: 400,
-          message: "Image ID is required"
+          message: "Image ID is required",
         });
       }
 
@@ -75,13 +90,13 @@ export default defineEventHandler(async (event: H3Event) => {
 
     throw createError({
       statusCode: 405,
-      message: "Method not allowed"
+      message: "Method not allowed",
     });
   } catch (error: any) {
     console.error(`[API] Error in /products/${productId}/images:`, error);
     throw createError({
       statusCode: error.statusCode || 500,
-      message: error.message || 'Internal server error'
+      message: error.message || "Internal server error",
     });
   }
 });

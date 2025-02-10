@@ -17,16 +17,30 @@
         <!-- Image grid -->
         <div v-if="images.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div v-for="image in images" :key="image.id" class="relative group">
-                <img :src="image.public_url" class="w-full h-40 object-cover rounded"
-                    :class="{ 'border-2 border-blue-500': image.is_primary }" />
+                <img :src="image.public_url" class="w-full h-40 object-cover rounded transition-all duration-200"
+                    :class="{ 'ring-2 ring-blue-500 ring-offset-2': image.is_primary }" />
+
+                <!-- Primary badge -->
+                <div v-if="image.is_primary"
+                    class="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                    Primary
+                </div>
 
                 <div
                     class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
-                    <button @click="setPrimaryImage(image.id)" class="p-2 bg-blue-500 rounded text-white"
-                        :disabled="image.is_primary">
-                        Set Primary
+                    <button @click="setPrimaryImage(image.id)" class="p-2 rounded text-white transition-colors"
+                        :class="image.is_primary ? 'bg-blue-700 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'"
+                        :disabled="image.is_primary"
+                        :title="image.is_primary ? 'This is the primary image' : 'Set as primary image'">
+                        <template v-if="image.is_primary">
+                            ✓ Primary
+                        </template>
+                        <template v-else>
+                            Set Primary
+                        </template>
                     </button>
-                    <button @click="deleteImage(image.id)" class="p-2 bg-red-500 rounded text-white">
+                    <button @click="deleteImage(image.id)"
+                        class="p-2 bg-red-500 hover:bg-red-600 rounded text-white transition-colors">
                         Delete
                     </button>
                 </div>
@@ -88,16 +102,16 @@ async function handleFileUpload(event: Event) {
 
 async function setPrimaryImage(imageId: string) {
     try {
-        loading.value = true
+        loading.value = true;
         await productStore.updateProductImage(props.productId, {
             imageId,
             isPrimary: true
-        })
-        await loadImages() // Reload to get updated primary status
+        });
+        await loadImages(); // Reload to get updated primary status
     } catch (error) {
-        console.error('Error setting primary image:', error)
+        console.error('Error setting primary image:', error);
     } finally {
-        loading.value = false
+        loading.value = false;
     }
 }
 
