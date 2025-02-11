@@ -4,8 +4,8 @@
       <nav class="container mx-auto px-4 py-2 flex justify-between items-center">
         <span class="text-sm font-semibold">Admin Area</span>
         <ul class="flex space-x-6">
-          <li><a href="/create" class="hover:text-gray-300">Create</a></li>
-          <li><a href="/manage" class="hover:text-gray-300">Manage</a></li>
+          <!-- <li><a href="/create" class="hover:text-gray-300">Create</a></li> -->
+          <li><a href="/manage" class="underline hover:text-gray-300">Manage Inventory</a></li>
         </ul>
       </nav>
     </div>
@@ -19,11 +19,14 @@
         <ul class="flex space-x-6">
           <li><a href="/" class="hover:text-gray-300">Home</a></li>
           <li>
-            <a href="/cart" class="hover:text-gray-300 flex items-center">
+            <!-- <a href="/cart" class="hover:text-gray-300 flex items-center">
               Cart
               <span v-if="cartStore.itemCount" class="ml-2 bg-green-500 text-white rounded-full px-2 py-1 text-xs">
                 {{ cartStore.itemCount }}
               </span>
+            </a> -->
+            <a href="/contact" class="hover:text-gray-300 flex items-center">
+              Contact Us!
             </a>
           </li>
         </ul>
@@ -36,7 +39,7 @@
 
     <footer class="bg-gray-800 text-white">
       <div class="container mx-auto px-4 py-4 text-center">
-        &copy; {{ new Date().getFullYear() }} 3D Print Shop. All rights reserved.
+        &copy; {{ new Date().getFullYear() }} Virtual Craft Innovations. All rights reserved.
       </div>
     </footer>
   </div>

@@ -4,8 +4,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   devServer: {
     https: {
-      key: './localhost-key.pem',
-      cert: './localhost.pem',
+      key: "./localhost-key.pem",
+      cert: "./localhost.pem",
     },
     port: 3000,
   },
@@ -16,6 +16,9 @@ export default defineNuxtConfig({
         clientSecret: process.env.NUXT_OAUTH_GOOGLE_CLIENT_SECRET,
         redirectURL: process.env.NUXT_OAUTH_GOOGLE_REDIRECT_URL,
       },
+    },
+    public: {
+      customQuoteEmail: process.env.CUSTOM_QUOTE_EMAIL,
     },
   },
   modules: [
