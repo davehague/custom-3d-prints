@@ -5,8 +5,9 @@
     </div>
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-for="product in activeProducts" :key="product.id" class="bg-white rounded-lg shadow-md overflow-hidden">
-        <img :src="product.images?.[0]?.public_url || 'cube.png'" :alt="product.name"
-          class="w-full h-48 object-cover" />
+        <NuxtLink :to="`/product/${product.id}`">
+          <img :src="getPrimaryImage(product) || 'cube.png'" :alt="product.name" class="w-full h-48 object-cover" />
+        </NuxtLink>
         <div class="p-4">
           <h2 class="text-xl font-semibold mb-2">{{ product.name }}</h2>
           <p class="text-gray-600 mb-4">{{ product.description }}</p>
@@ -25,12 +26,18 @@
 <script setup lang="ts">
 import { useProductStore } from '~/stores/products'
 import { computed, onMounted } from 'vue'
+import type { DBProductWithImages, DBProductImage } from '~/types/database'
 
 const productStore = useProductStore()
 
 const activeProducts = computed(() =>
   productStore.products.filter(product => product.active)
 )
+
+const getPrimaryImage = (product: DBProductWithImages) => {
+  const primaryImage = product.images?.find((img: DBProductImage) => img.is_primary)
+  return primaryImage?.public_url || product.images?.[0]?.public_url
+}
 
 onMounted(async () => {
   await productStore.getAllProducts()

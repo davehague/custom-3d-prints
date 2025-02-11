@@ -8,11 +8,26 @@
   <div v-else-if="product" class="container mx-auto px-4 py-8">
     <div class="flex flex-col md:flex-row gap-8">
       <!-- Image Gallery Section -->
-      <div class="md:w-1/2">
-        <img :src="currentImage || product.images?.[0]?.public_url || '/cube.png'" :alt="product.name"
+      <div class="md:w-1/2 relative">
+        <img :src="currentImage || sortedImages[0]?.public_url || '/cube.png'" :alt="product.name"
           class="w-full rounded-lg shadow-md object-cover aspect-square" />
+
+        <!-- Navigation Arrows -->
+        <button v-if="canGoPrevious" @click="previousImage"
+          class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button v-if="canGoNext" @click="nextImage"
+          class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
         <div v-if="product.images?.length > 1" class="mt-4 flex gap-2 overflow-x-auto">
-          <img v-for="image in product.images" :key="image.id" :src="image.public_url" :alt="product.name"
+          <img v-for="image in sortedImages" :key="image.id" :src="image.public_url" :alt="product.name"
             @click="currentImage = image.public_url"
             class="w-24 h-24 object-cover cursor-pointer rounded border-2 hover:border-blue-500"
             :class="currentImage === image.public_url ? 'border-blue-500' : 'border-transparent'" />
@@ -61,13 +76,42 @@ const props = defineProps<{
 const productStore = useProductStore();
 const router = useRouter();
 const currentImage = ref<string | null>(null);
+const currentImageIndex = computed(() => {
+  if (!currentImage.value || !product.value?.images) return 0;
+  return product.value.images.findIndex(img => img.public_url === currentImage.value);
+});
+
+const canGoPrevious = computed(() => currentImageIndex.value > 0);
+const canGoNext = computed(() => {
+  if (!product.value?.images) return false;
+  return currentImageIndex.value < product.value.images.length - 1;
+});
+
+const previousImage = () => {
+  if (!product.value?.images || !canGoPrevious.value) return;
+  currentImage.value = product.value.images[currentImageIndex.value - 1].public_url;
+};
+
+const nextImage = () => {
+  if (!product.value?.images || !canGoNext.value) return;
+  currentImage.value = product.value.images[currentImageIndex.value + 1].public_url;
+};
 
 const product = computed(() => productStore.currentProduct);
 
+const sortedImages = computed(() => {
+  if (!product.value?.images) return [];
+  return [...product.value.images].sort((a, b) => {
+    if (a.is_primary) return -1;
+    if (b.is_primary) return 1;
+    return 0;
+  });
+});
+
 onMounted(async () => {
   await productStore.getProductById(props.productId);
-  if (productStore.currentProduct?.images?.[0]) {
-    currentImage.value = productStore.currentProduct.images[0].public_url;
+  if (sortedImages.value[0]) {
+    currentImage.value = sortedImages.value[0].public_url;
   }
 });
 
