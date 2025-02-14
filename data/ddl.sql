@@ -79,4 +79,10 @@ alter table virtualcraftinnovations.product_customizations enable row level secu
 
 
 ALTER TABLE virtualcraftinnovations.product_images ADD COLUMN public_url TEXT;
-ALTER TABLE readwise.products ALTER COLUMN price TYPE VARCHAR(255);
+ALTER TABLE virtualcraftinnovations.products ALTER COLUMN price TYPE VARCHAR(255);
+
+ALTER TABLE virtualcraftinnovations.product_images
+ADD CONSTRAINT fk_product_images_product
+FOREIGN KEY (product_id)
+REFERENCES virtualcraftinnovations.products(id)
+ON DELETE CASCADE;

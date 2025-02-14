@@ -22,7 +22,7 @@ export class ProductService {
         .select(
           `
           *,
-          images:product_images(*)
+          images:product_images!fk_product_images_product(*)
         `
         )
         .eq("active", true)
@@ -54,7 +54,7 @@ export class ProductService {
         .select(
           `
           *,
-          images:product_images(*)
+          images:product_images!fk_product_images_product(*)
         `
         )
         .eq("id", id)
@@ -137,6 +137,29 @@ export class ProductService {
   static async deleteProduct(id: string): Promise<void> {
     console.log(`[ProductService] Deleting product:`, id);
     try {
+      // First get all images for this product
+      const { data: images } = await serverSupabase
+        .from("product_images")
+        .select("storage_path")
+        .eq("product_id", id);
+
+      // Delete all image files from storage
+      if (images && images.length > 0) {
+        const storagePaths = images.map((img) => img.storage_path);
+        const { error: storageError } = await serverSupabase.storage
+          .from("product-images")
+          .remove(storagePaths);
+
+        if (storageError) {
+          console.error(
+            `[ProductService] Error deleting image files:`,
+            storageError
+          );
+          throw storageError;
+        }
+      }
+
+      // Delete the product (cascade will handle product_images table)
       const { error } = await serverSupabase
         .from("products")
         .delete()

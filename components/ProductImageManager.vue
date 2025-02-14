@@ -3,14 +3,33 @@
         <div class="flex items-center justify-between border-b border-blue-200 pb-4">
             <h3 class="text-2xl font-bold text-blue-800">Product Images</h3>
             <label
-                class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors">
+                class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors"
+                :class="{ 'opacity-50 cursor-not-allowed': isProcessing }">
                 Upload Images
-                <input type="file" multiple accept="image/*" class="hidden" @change="handleFileUpload" />
+                <input type="file" multiple accept="image/*" class="hidden" @change="handleFileUpload"
+                    :disabled="isProcessing" />
             </label>
         </div>
 
+        <!-- Processing state -->
+        <div v-if="isProcessing" class="bg-blue-100/50 rounded-lg p-4 space-y-2">
+            <div class="flex items-center justify-between text-blue-800">
+                <span>Processing images...</span>
+                <span>{{ processedCount }}/{{ totalFiles }} complete</span>
+            </div>
+            <div class="w-full bg-blue-200 rounded-full h-2">
+                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    :style="{ width: `${(processedCount / totalFiles) * 100}%` }" />
+            </div>
+            <div v-if="processingStats.length > 0" class="text-sm text-blue-700 space-y-1">
+                <div v-for="(stat, index) in processingStats" :key="index">
+                    {{ stat }}
+                </div>
+            </div>
+        </div>
+
         <!-- Loading state -->
-        <div v-if="loading" class="text-center py-4 text-blue-800">
+        <div v-if="loading && !isProcessing" class="text-center py-4 text-blue-800">
             Loading...
         </div>
 
@@ -60,6 +79,19 @@ import { ref, onMounted } from 'vue'
 import { useProductStore } from '@/stores/products'
 import type { DBProductImage } from '@/types/database'
 
+// Constants for image processing
+const MAX_FILE_SIZE_MB = 2
+const MAX_WIDTH = 1920
+const MAX_HEIGHT = 1920
+
+interface ProcessedImage {
+    file: File
+    width: number
+    height: number
+    originalSize: number
+    newSize: number
+}
+
 const props = defineProps<{
     productId: string
 }>()
@@ -67,12 +99,127 @@ const props = defineProps<{
 const productStore = useProductStore()
 const images = ref<DBProductImage[]>([])
 const loading = ref(false)
+const isProcessing = ref(false)
+const processedCount = ref(0)
+const totalFiles = ref(0)
+const processingStats = ref<string[]>([])
 
 onMounted(async () => {
     await loadImages()
 })
 
-async function loadImages() {
+const processImage = async (file: File): Promise<ProcessedImage> => {
+    // Create a promise wrapper around image loading
+    const loadImage = (file: File): Promise<HTMLImageElement> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image()
+            img.onload = () => resolve(img)
+            img.onerror = reject
+            img.src = URL.createObjectURL(file)
+        })
+    }
+
+    const img = await loadImage(file)
+    const canvas = document.createElement('canvas')
+    let { width, height } = img
+
+    // Calculate new dimensions while maintaining aspect ratio
+    if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+        const ratio = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height)
+        width = Math.floor(width * ratio)
+        height = Math.floor(height * ratio)
+    }
+
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('Could not get canvas context')
+
+    // Draw and compress the image
+    ctx.drawImage(img, 0, 0, width, height)
+
+    // Try different quality settings to get under maxSizeMB
+    let quality = 0.9
+    let blob: Blob
+    const maxBytes = MAX_FILE_SIZE_MB * 1024 * 1024
+
+    do {
+        blob = await new Promise(resolve => {
+            canvas.toBlob(b => resolve(b!), 'image/jpeg', quality)
+        })
+        quality -= 0.1
+    } while (blob.size > maxBytes && quality > 0.1)
+
+    // Clean up
+    URL.revokeObjectURL(img.src)
+
+    // Convert blob to file
+    const processedFile = new File([blob], file.name, {
+        type: 'image/jpeg',
+        lastModified: Date.now(),
+    })
+
+    return {
+        file: processedFile,
+        width,
+        height,
+        originalSize: file.size,
+        newSize: processedFile.size
+    }
+}
+
+const formatFileSize = (bytes: number): string => {
+    return `${(bytes / 1024 / 1024).toFixed(2)}MB`
+}
+
+const handleFileUpload = async (event: Event) => {
+    const input = event.target as HTMLInputElement
+    if (!input.files?.length) return
+
+    try {
+        isProcessing.value = true
+        loading.value = true
+        processedCount.value = 0
+        processingStats.value = []
+
+        const files = Array.from(input.files)
+        totalFiles.value = files.length
+
+        // Process each image
+        const processedFiles = await Promise.all(
+            files.map(async (file) => {
+                // Basic validation
+                if (!file.type.startsWith('image/')) {
+                    throw new Error(`${file.name} is not an image file`)
+                }
+
+                try {
+                    const processed = await processImage(file)
+                    processedCount.value++
+
+                    const stat = `${file.name}: ${formatFileSize(processed.originalSize)} → ${formatFileSize(processed.newSize)}`
+                    processingStats.value.push(stat)
+
+                    return processed.file
+                } catch (error) {
+                    console.error(`Error processing ${file.name}:`, error)
+                    throw error
+                }
+            })
+        )
+
+        await productStore.uploadProductImages(props.productId, processedFiles)
+        await loadImages()
+    } catch (error) {
+        console.error('Error uploading files:', error)
+    } finally {
+        loading.value = false
+        isProcessing.value = false
+        input.value = ''
+    }
+}
+
+const loadImages = async () => {
     try {
         loading.value = true
         const result = await productStore.getProductImages(props.productId)
@@ -84,46 +231,28 @@ async function loadImages() {
     }
 }
 
-async function handleFileUpload(event: Event) {
-    const input = event.target as HTMLInputElement
-    if (!input.files?.length) return
-
+const setPrimaryImage = async (imageId: string) => {
     try {
         loading.value = true
-        const files = Array.from(input.files)
-        await productStore.uploadProductImages(props.productId, files)
-        await loadImages() // Reload images after upload
-    } catch (error) {
-        console.error('Error uploading files:', error)
-    } finally {
-        loading.value = false
-        // Reset input
-        input.value = ''
-    }
-}
-
-async function setPrimaryImage(imageId: string) {
-    try {
-        loading.value = true;
         await productStore.updateProductImage(props.productId, {
             imageId,
             isPrimary: true
-        });
-        await loadImages(); // Reload to get updated primary status
+        })
+        await loadImages()
     } catch (error) {
-        console.error('Error setting primary image:', error);
+        console.error('Error setting primary image:', error)
     } finally {
-        loading.value = false;
+        loading.value = false
     }
 }
 
-async function deleteImage(imageId: string) {
+const deleteImage = async (imageId: string) => {
     if (!confirm('Are you sure you want to delete this image?')) return
 
     try {
         loading.value = true
         await productStore.deleteProductImage(props.productId, imageId)
-        await loadImages() // Reload images after deletion
+        await loadImages()
     } catch (error) {
         console.error('Error deleting image:', error)
     } finally {

@@ -167,6 +167,10 @@ async function deleteProduct(id: string) {
     if (confirm('Are you sure you want to delete this product?')) {
         try {
             await productStore.deleteProduct(id)
+            // Reset form and clear editing state if we're deleting the currently edited product
+            if (editingProduct.value === id) {
+                resetForm()
+            }
         } catch (error) {
             console.error('Error deleting product:', error)
         }
